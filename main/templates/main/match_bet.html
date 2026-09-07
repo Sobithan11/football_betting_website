@@ -1,0 +1,460 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="app">
+        <div class="header">
+            <!-- Your header content here -->
+        </div>
+        {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                <p style="color:red">{{ message }}</p>
+            {% elif message.tags == 'success' %}
+                <p style="color:green">{{ message }}</p>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+        <div class="match-details">
+            {% for gameweek, fixtures in fixtures_by_gameweek.items %}
+            {% for match in fixtures %}
+                {% if match.home_team == home_team and match.away_team == away_team %}
+                <title>{{match.home_team}} vs {{match.away_team}}</title>
+                            <table class="match-table">
+                                <tr>
+                                    <th class="align-left">Home Team</th>
+                                    <th class="align-center score-column">{{match.fixture_date}}</th>
+                                    <th class="align-right">Away Team</th>
+                                </tr>
+                                <tr class="match-row">
+                                    <td class="align-left team-column">
+                                        <img src="{{ match.home_logo }}" alt="{{ match.home_team }}" class="team-logo">
+                                        {{ match.home_team }}
+                                    </td>
+                                    {% if match.home_score is not None and match.away_score is not None %}
+                                        <td class="align-center score-column">{{ match.home_score }} - {{ match.away_score }}</td>
+                                    {% else %}
+                                        <td class="align-center score-column fixture-time">{{ match.fixture_time }}</td>
+                                    {% endif %}
+                                    <td class="align-right team-column">
+                                        {{ match.away_team }}
+                                        <img src="{{ match.away_logo }}" alt="{{ match.away_team }}" class="team-logo-away">
+                                    </td>
+                                </tr>
+                                <tr class="separator-row">
+                                    <td colspan="3"></td>
+                                </tr>
+                            </table>
+
+                            {% if match.home_score is None and match.away_score is None %}
+                            {% if betting_info_not_available %}
+                            <p style="color: white;">Betting information is currently not available for this match.</p>
+                            {% else %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <div>
+                                    <h4 style="color: white;">Winner Prediction:</h4>
+                                    <div class="team-selection">
+                                        <div class="team-label home-team">
+                                            <input type="radio" id="home_team" name="winner_prediction" value="{{ match.home_team }}" required>
+                                            <label for="home_team" class="radio-label" style="color: white; font-size: 1.5em;">{{ match.home_team }} - {{ Bet365_home }}{% if Bet365_home.denominator == 1 %}/1{% endif %}</label>
+                                        </div>
+                            
+                                        <div class="team-label draw">
+                                            <input type="radio" id="draw" name="winner_prediction" value="draw" required>
+                                            <label for="draw" class="radio-label" style="color: white; font-size: 1.5em;">Draw - {{ Bet365_draw }}{% if Bet365_draw.denominator == 1 %}/1{% endif %}</label>
+                                        </div>
+                            
+                                        <div class="team-label away-team">
+                                            <input type="radio" id="away_team" name="winner_prediction" value="{{ match.away_team }}" required>
+                                            <label for="away_team" class="radio-label" style="color: white; font-size: 1.5em;">{{ match.away_team }} - {{ Bet365_away }}{% if Bet365_away and Bet365_away.denominator == 1 %}/1{% endif %}</label></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="winner_bet_amount" style="color: white;">Your Bet Amount:</label>
+                                    <input type="number" name="winner_bet_amount" id="winner_bet_amount" required style="color: white;" min="1">
+                                </div>
+                                <!-- Add a submit button for the winner prediction form -->
+                                <button type="submit">Submit Winner Prediction</button>
+                            </form>
+                            <br>
+                            <br>
+                            <div class="score-prediction-header">
+                                <h4 style="color: white; display: inline-block;">Score Prediction:</h4>
+                            </div>
+                            <div class="odds-button-container">
+                                <button id="showOddsButton" class="odds-button" onclick="showOddsPopup()">Show Odds</button>
+                            </div>
+                            <br>
+                            <!-- Add the score prediction input fields -->
+                            <form method="post" id="scorePredictionForm">
+                                {% csrf_token %}
+                            <div>
+                                <label for="home_score" style="color: white;">Your Prediction for {{ match.home_team }}:</label>
+                                <input type="number" name="home_score" id="home_score" required style="color: white;" min="0">
+                            </div>
+                            <div>
+                                <label for="away_score" style="color: white;">Your Prediction for {{ match.away_team }}:</label>
+                                <input type="number" name="away_score" id="away_score" required style="color: white;" min="0">
+                            </div>
+                            <div>
+                                <label for="bet_amount" style="color: white;">Your Bet Amount:</label>
+                                <input type="number" name="bet_amount" id="bet_amount" required style="color: white;" min="1">
+                            </div>
+                            
+                            <!-- Add a submit button for the form -->
+                            <button type="submit">Submit Score Prediction</button>
+                        </form>
+                        
+                        <!-- Add odds popup -->
+                        <div id="oddsPopup" class="popup">
+                            <div style="color: white;"class="popup-content">
+                                <span style = "color: white"class="close" onclick="closeOddsPopup()">&times;</span>
+                                <h3>Odds for Scores</h3>
+                                <div class="odds-grid">
+                                    <!-- Display odds dynamically based on exact_score_odds -->
+                                    {% for score, odds in exact_score_odds.items %}
+                                    <div class="odds-item">
+                                        <p class="score">{{ score }}</p>
+                                        <p class="odds">{{ odds }}{% if odds.denominator == 1 %}/1{% endif %}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="other-score odds-item">
+                                    <p>Any other score: (Total Goals*10)/1</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <p style="color: white;">Cannot bet on this match as it has started or already happened</p>
+                        {% endif %}
+                {% endif %}
+                {% endfor %}
+            {% endfor %}
+            {% if bets_exist_for_match%}
+            <div class="bet-slip">
+                <h3 style="color: white;">Bet Slips</h3>
+                {% for bet in user_profile.user.bet_set.all %}
+                    {% if bet.match.fixture_id == fixture_id %}
+                        <div class="bet-item">
+                            <div class="bet-rectangle">
+                            <p><strong>Bet Type:</strong> {{ bet.bet_type }} </p>
+                            {% if bet.bet_type == 'Winner' %}
+                            <p><strong>Bet Choice:</strong> {{ bet.winner_bet.winning_team }} </p>
+                             {% elif bet.bet_type == 'Score' %}
+                            <p><strong>Bet Choice:</strong> {{ bet.score_bet.score_prediction }} </p>
+                            {% endif %}
+                            <p><strong>Bet Amount:</strong> {{ bet.bet_amount }}</p>
+                            <p><strong>Bet Return:</strong> {{ bet.bet_return }}</p>
+                            <p><strong>Bet Time:</strong> {{ bet.bet_time }}</p>
+                            <p><strong>Bet Status:</strong> {{ bet.bet_status }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div> 
+    </div>
+</div>
+<script>
+
+</script>
+<style>
+    
+    /* Your existing styles */
+
+    /* Media query for smaller screens */
+    @media only screen and (max-width: 200px) {
+        .match-table th,
+        .match-row {
+            display: block;
+            width: 100%;
+        }
+
+        .match-table th {
+            padding: 5px 0;
+            text-align: left;
+        }
+
+        .match-row {
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .team-column,
+        .score-column {
+            width: 100%;
+            text-align: left;
+            font-size: 1em;
+            padding: 5px 0;
+        }
+
+        .team-logo,
+        .team-logo-away {
+            display: none;
+        }
+
+        .separator-row {
+            display: none;
+        }
+
+        .odds-item {
+            width: 100%;
+        }
+
+        .odds-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .other-score {
+            margin-top: 10px;
+        }
+
+        .team-label {
+            margin: 0;
+            display: block;
+            text-align: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        
+        .bet-rectangle {
+            width: 100%;
+        }
+
+        .bet-slip {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bet-item {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+    }
+.other-score {
+    border: 1px solid #ccc; /* Outline style */
+    padding: 10px; /* Padding to create space inside the rectangle */
+    border-radius: 5px; /* Rounded corners */
+    text-align: center; /* Center-align the text */
+    margin-top: 20px; /* Spacing from the odds grid */
+}
+        .odds-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-gap: 10px;
+        margin-top: 20px;
+    }
+
+    /* Style for each odds item */
+    .odds-item {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px;
+    }
+    .odds-button-container {
+        margin-top: 0px;
+        text-align: left;
+        
+    }
+
+    .odds-button {
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* Style for the odds popup */
+    .popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #333;
+    border: 1px solid #ddd;
+    padding: 10px;
+    width: 400px; /* Adjust the width as needed */
+    z-index: 1000;
+    border-radius: 10px;
+}
+
+    .popup-content {
+        text-align: center;
+    }
+
+    /* Style for the close button */
+    .close {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+
+    .close:hover,
+    .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
+.bet-slip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.bet-item {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Add styles for each bet rectangle */
+.bet-rectangle {
+    background-color: #333333;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+    /* Add necessary styles for the match details table */
+    .match-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #ffffff;
+        margin-top: 20px; /* Adjust margin as needed */
+    }
+
+    .match-table th {
+        background-color: #222222;
+        padding: 10px;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .match-row {
+        background-color: #444444;
+        height: 60px; /* Adjust the height of each row */
+    }
+
+    .separator-row {
+        border-top: 1px solid #555555;
+    }
+
+    /* Align headers and data accordingly */
+    .align-left {
+        text-align: left;
+    }
+
+    .align-center {
+        text-align: center;
+    }
+
+    .align-right {
+        text-align: right;
+    }
+    .team-label {
+        display: inline-block;
+        text-align: center;
+        margin: 0 10px;
+    }
+    .team-selection {
+        text-align: center;
+    }
+
+    .home-team {
+        float: left;
+    }
+
+    .away-team {
+        float: right;
+    }
+
+    .draw {
+        display: inline-block;
+    }
+    /* Set a fixed width for the team and score columns */
+    .team-column {
+        width: 30%;
+        font-size: 1.2em; /* Adjust the font size for team names */
+        text-align: center; /* Align team names at the center */
+    }
+
+    .score-column {
+        width: 20%;
+        font-size: 1.2em; /* Adjust the font size for scores */
+    }
+
+    .fixture-time {
+        font-size: 1.2em; /* Adjust the font size for fixture time */
+    }
+
+    .team-logo {
+        height: 30px;
+        width: 30px;
+        margin-right: 10px;
+    }
+
+    .team-logo-away {
+        height: 30px;
+        width: 30px;
+        margin-left: 10px;
+    }
+    .radio-label:hover ,
+    .radio-label.selected  {
+      box-shadow: 0 0 10px gray; /* Adjust the shadow as needed */
+    }
+
+    .radio-label.selected  {
+      color: gray;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Add click event listeners to update the selected class
+      const teamLabels = document.querySelectorAll('.radio-label');
+      teamLabels.forEach(function (label) {
+        label.addEventListener('click', function () {
+          // Remove 'selected' class from all labels
+          teamLabels.forEach(function (otherLabel) {
+            otherLabel.classList.remove('selected');
+          });
+
+          // Add 'selected' class to the clicked label
+          label.classList.add('selected');
+        });
+      });
+    });
+
+    // JavaScript functions to show and close the odds popup
+    function showOddsPopup() {
+        document.getElementById('oddsPopup').style.display = 'block';
+    }
+
+    function closeOddsPopup() {
+        document.getElementById('oddsPopup').style.display = 'none';
+    }
+
+    // Close the popup if the user clicks outside of it
+    window.onclick = function (event) {
+        if (event.target == document.getElementById('oddsPopup')) {
+            document.getElementById('oddsPopup').style.display = 'none';
+        }
+    };
+  </script>
+
+{% endblock %}

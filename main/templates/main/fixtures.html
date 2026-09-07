@@ -1,0 +1,215 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<title>Bet</title>
+<div class="container">
+    <div class="app">
+        <div class="header">
+            <div class="table-header">
+                <div class="table-header-center">
+                    <label for="gameweek-select">Select Gameweek:</label>
+                    <select id="gameweek-select" onchange="changeGameweek(this)">
+                        {% for gameweek in gameweeks %}
+                            <option value="{{ forloop.counter0 }}" {% if gameweek.selected %}selected{% endif %}>
+                                Gameweek {{ gameweek.gameweek_number }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        {% for gameweek in gameweeks %}
+            {% if gameweek.selected %}
+                <h2 style="color: white;">Gameweek {{ gameweek.gameweek_number }}</h2>
+                <table class="match-table">
+                    <tr>
+                        <th class="align-left">Home Team</th>
+                        <th class="align-center score-column"></th>
+                        <th class="align-right">Away Team</th>
+                    </tr>
+                    {% for match in gameweek.fixtures %}
+                        <tr class="match-row {% if match.home_team == user_profile.favourite_team or match.away_team == user_profile.favourite_team %}favourite-team{% endif %}" data-url="{% url 'match_bet' match.home_team match.away_team %}" style="cursor: pointer;" title="Bet">
+                            <td class="align-left team-column">
+                                <img src="{{ match.home_logo }}" alt="{{ match.home_team }}" class="team-logo">
+                                {{ match.home_team }}
+                            </td>
+                            {% if match.home_score is not None and match.away_score is not None %}
+                                <td class="align-center score-column">{{ match.home_score }} - {{ match.away_score }}</td>
+                            {% else %}
+                                <td class="align-center score-column fixture-time">{{ match.fixture_date }} {{ match.fixture_time }}</td>
+                            {% endif %}
+                            <td class="align-right team-column">
+                                {{ match.away_team }}
+                                <img src="{{ match.away_logo }}" alt="{{ match.away_team }}" class="team-logo-away">
+                            </td>
+                        </tr>
+                        <tr class="separator-row">
+                            <td colspan="3"></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<style>
+    .match-row.favourite-team {
+        border: 2px solid gold;
+    }
+
+
+        select {
+        display: block;
+        padding: 6px;
+        margin: 5px 0;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    }
+    .team-logo {
+        height: 30px;
+        width: 30px;
+        margin-right: 10px; /* Adjust the margin to separate the logo from the team name */
+    }
+    /* Add necessary styles for the table header */
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .table-header-left {
+        flex: 1;
+        text-align: left;
+    }
+
+    .table-header-right {
+        flex: 1;
+        text-align: right;
+        margin-right: -10px; 
+        
+    }
+
+    .table-title {
+        flex: 1;
+        text-align: center;
+        color: white;
+    }
+
+    /* Style for navigation buttons */
+    .navigation-button {
+        background-color: #222222;
+        color: #ffffff;
+        padding: 10px;
+        text-decoration: none; /* Remove underline */
+        margin-right: 10px;
+        border-radius: 5px;
+        font-size: 1.5em; /* Adjust the font size of the arrows */
+    }
+
+    .navigation-button:hover {
+        background-color: #555555;
+        text-decoration: none; /* Remove underline on hover */
+        color: #ffffff; /* Set text color to white on hover */
+    }
+
+    /* Other styles for the match table */
+    .container {
+        background-color: #333333;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 1000px;
+        overflow-x: auto;
+    }
+
+    .match-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #ffffff;
+    }
+
+    .match-table th {
+        background-color: #222222;
+        padding: 10px;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .match-row {
+        background-color: #444444;
+        height: 60px; /* Adjust the height of each row */
+    }
+    .match-row:hover {
+        background-color: #808080;
+    }
+
+    .separator-row {
+        border-top: 1px solid #555555;
+    }
+
+
+    /* Align headers and data accordingly */
+    .align-left {
+        text-align: left;
+    }
+
+    .align-center {
+        text-align: center;
+    }
+
+    .align-right {
+        text-align: right;
+    }
+
+    /* Set a fixed width for the team and score columns */
+    .team-column {
+        width: 30%;
+        font-size: 1.2em; /* Adjust the font size for team names */
+        text-align: center; /* Align team names at the center */
+    }
+
+    .score-column {
+        width: 20%;
+        font-size: 1.2em; /* Adjust the font size for scores */
+    }
+
+    .fixture-time {
+        font-size: 1.2em; /* Adjust the font size for fixture time */
+    }
+    .team-logo-away {
+        height: 30px;
+        width: 30px;
+        margin-left: 10px; /* Adjust the margin to create more space between the logo and the team name */
+    }
+</style>
+<script>
+    // JavaScript code to handle the click event
+    document.addEventListener("DOMContentLoaded", function () {
+        var matchRows = document.querySelectorAll(".match-row");
+
+        matchRows.forEach(function (row) {
+            row.addEventListener("click", function () {
+                var url = row.getAttribute("data-url");
+                window.location.href = url;
+            });
+        });
+    });
+    
+    function changeGameweek(selectElement) {
+        var selectedOffset = selectElement.value;
+        window.location.href = "?offset=" + selectedOffset;
+    }
+
+    // ... (existing JavaScript code remains unchanged)
+
+</script>
+
+{% endblock %}

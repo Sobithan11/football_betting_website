@@ -1,0 +1,13 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Create Thread{% endblock %}
+
+{% block content %}
+    <h1 style="color: white;">Create Thread</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="title">Thread Title:</label>
+        <input style="color:white" type="text" id="title" name="title" required>
+        <button type="submit">Create Thread</button>
+    </form>
+{% endblock %}

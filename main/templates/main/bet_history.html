@@ -1,0 +1,160 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<title>Bet History</title>
+<style>
+    /* Style for the table container */
+    .table-container {
+        background-color: #333;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 1000px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Style for the table */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Style for table header */
+    th {
+        background-color: #222;
+        color: #fff;
+        padding: 12px;
+        text-align: left;
+        vertical-align: middle;
+        border: 1px solid #555;
+    }
+
+    /* Style for table rows */
+    td {
+        padding: 12px;
+        color: #fff;
+        border: 1px solid #555;
+    }
+
+    /* Style for alternating row background */
+    tr:nth-child(even) {
+        background-color: #444;
+    }
+
+    /* DataTable custom styling */
+    #bet-history-table_wrapper {
+        
+        padding: 20px;
+        color: white;
+        border-radius: 10px;
+        overflow: auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #bet-history-table_filter input {
+        width: 150px;
+        height: 28px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        background-color: #222;
+        color: white;
+    }
+
+    #bet-history-table th,
+    #bet-history-table td {
+        text-align: center;
+        color: white;
+        border: 1px solid #555;
+    }
+
+    #bet-history-table tfoot th {
+        
+        background-color: #333;
+    }
+
+    #bet-history-table_paginate {
+        margin-top: 20px;
+    }
+
+    /* Custom styling for Previous and Next buttons */
+    #bet-history-table_previous,
+    #bet-history-table_next {
+        color: white !important;
+        background-color: #333 !important;
+        border: 1px solid #555 !important;
+        padding: 8px 12px !important;
+        border-radius: 5px !important;
+        transition: background-color 0.3s;
+    }
+
+    #bet-history-table_previous:hover,
+    #bet-history-table_next:hover {
+        background-color: #555 !important;
+    }
+
+    #bet-history-table_length select {
+        display: block; /* Display the select as a block */
+        width: 75px;
+        height: 28px;
+        margin: 5px 0; /* Adjust margin as needed */
+        border: 1px solid #555;
+        border-radius: 5px;
+        background-color: #222;
+        color: white;
+        
+    }
+    
+</style>
+
+<div class="table-container">
+    <table id="bet-history-table">
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Bet Type</th>
+                <th>Bet Choice</th>
+                <th>Bet Date and Time</th>
+                <th>Bet Amount</th>
+                <th>Bet Return</th>
+                <th>Bet Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in user_bets_grouped %}
+                {% for bet in group.bets %}
+                    <tr>
+                        <td>{{ bet.match.team1 }} vs {{ bet.match.team2 }}</td>
+                        <td>{{ bet.bet_type }}</td>
+                        <td>
+                            {% if bet.bet_type == 'Winner' %}
+                                {{ bet.winner_prediction }}
+                            {% elif bet.bet_type == 'Score' %}
+                                {{ bet.home_score_prediction }} - {{ bet.away_score_prediction }}
+                            {% endif %}
+                        </td>
+                        <td>{{ bet.bet_time }}</td>
+                        <td>{{ bet.bet_amount }}</td>
+                        <td>{{ bet.bet_return }}</td>
+                        <td>{{ bet.bet_status }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+
+<!-- DataTables JS -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables
+        $('#bet-history-table').DataTable();
+    });
+</script>
+
+{% endblock %}

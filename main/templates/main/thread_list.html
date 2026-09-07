@@ -1,0 +1,36 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Thread List{% endblock %}
+
+{% block content %}
+<style>
+    .delete-btn {
+        background: none;
+        border: none;
+        color: red;
+        font-size: 16px;
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+</style>
+
+    <h1 style="color: white;">Thread List</h1>
+    <ul>
+    {% for thread in threads %}
+        <li style="position: relative; font-size: large;">
+            <a href="{% url 'thread_detail' thread_id=thread.id %}">{{ thread.title }}</a>
+            <br>
+            <br>
+            {% if thread.creator == request.user %}
+                <form method="post" action="{% url 'delete_thread' thread_id=thread.id %}" class="delete-form">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-btn">&#10006;</button>
+                </form>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+    <a href="{% url 'create_thread' %}" class="btn btn-primary">Create Thread</a>
+{% endblock %}

@@ -1,0 +1,81 @@
+
+{% block content %}
+  <title> Select Your Favourite Team </title>
+  <h2>Select Your Favourite Team</h2>
+  {% if messages %}
+    {% for message in messages %}
+      <div style="color: red;">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+  <form method="post" action="{% url 'select_favourite_team' %}">
+    {% csrf_token %}
+    <div class="team-grid">
+      {% for team in premier_league_teams %}
+        <label class="team-label">
+          <input type="radio" name="selected_team" value="{{ team.name }}">
+          <div class="team-info">
+            <img src="{{ team.logo }}" alt="{{ team.name }}" class="team-logo">
+            <p class="team-name">{{ team.name }}</p>
+          </div>
+        </label>
+      {% endfor %}
+    </div>
+    <button type="submit">Save</button>
+  </form>
+  <style>
+        body {
+      background-color: black;
+      color: white; /* Set text color to white for better visibility on a dark background */
+    }
+
+    h2 {
+      color: white; /* Set heading color to white */
+    }
+    .team-label {
+      display: inline-block;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    .team-info {
+      text-align: center;
+    }
+
+    .team-logo {
+      width: 100px; /* Adjust the size as needed */
+      height: 100px; /* Adjust the size as needed */
+      transition: box-shadow 0.3s ease;
+    }
+
+    .team-name {
+      margin-top: 5px;
+      font-weight: bold;
+    }
+
+    .team-label:hover .team-logo,
+    .team-label.selected .team-logo {
+      box-shadow: 0 0 10px gray; /* Adjust the shadow as needed */
+    }
+
+    .team-label.selected .team-name {
+      color: gray;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Add click event listeners to update the selected class
+      const teamLabels = document.querySelectorAll('.team-label');
+      teamLabels.forEach(function (label) {
+        label.addEventListener('click', function () {
+          // Remove 'selected' class from all labels
+          teamLabels.forEach(function (otherLabel) {
+            otherLabel.classList.remove('selected');
+          });
+
+          // Add 'selected' class to the clicked label
+          label.classList.add('selected');
+        });
+      });
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'main/base.html'%}
+{% block content%}
+<title>PL Table</title>
+<style>
+    /* Style for the table container */
+    .table-container {
+        background-color: #333333;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Style for the table */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Style for table header */
+    th {
+        background-color: #222222;
+        color: #ffffff;
+        padding: 10px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    /* Style for table rows */
+    td {
+        padding: 10px;
+        color: #ffffff;
+    }
+
+    /* Style for alternating row background */
+    tr:nth-child(even) {
+        background-color: #444444;
+    }
+
+    /* Style for team logo */
+    .team-logo {
+        height: 30px;
+        width: 30px;
+    }
+
+    /* Style for team name cell */
+    .team-name-cell {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Style for titles Played, Won, Lost, Draw, Points */
+    .title-cell {
+        padding-left: 0px;
+    }
+
+    /* Responsive adjustments */
+    @media only screen and (max-width: 768px) {
+        .table-container {
+            overflow-x: auto;
+        }
+        .team-logo {
+            height: 20px;
+            width: 20px;
+        }
+        .title-cell {
+            padding-left: 5px;
+        }
+        /* Optionally, you can adjust font sizes or other styles for better readability on smaller screens */
+    }
+</style>
+
+<div class="table-container">
+    <table>
+        <tr>
+            <th></th>
+            <th>Position</th>
+            <th>Team</th>
+            <th class="title-cell">Played</th>
+            <th class="title-cell">Won</th>
+            <th class="title-cell">Draw</th>
+            <th class="title-cell">Lost</th>
+            <th class="title-cell">Points</th>
+        </tr>
+        {% for team in table %}
+        <tr>
+            <td><img src="{{ team.team.logo }}" alt="{{ team.team.name }}" class="team-logo"></td>
+            <td>{{ team.rank }}</td>
+            <td class="team-name-cell">{{ team.team.name }}</td>
+            <td>{{ team.all.played }}</td>
+            <td>{{ team.all.win }}</td>
+            <td>{{ team.all.draw }}</td>
+            <td>{{ team.all.lose }}</td>
+            <td>{{ team.points }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

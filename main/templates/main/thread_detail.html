@@ -1,0 +1,48 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Thread Detail{% endblock %}
+
+{% block content %}
+<style>
+    .delete-btn {
+        background: none;
+        border: none;
+        color: red;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .message-container {
+        position: relative;
+    }
+
+    .delete-form {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+</style>
+
+    <h1 style="color:white">{{ thread.title }}</h1>
+    <title>{{ thread.title }}</title>
+    {% for message in thread.message_set.all %}
+        <div style ="color:white" class="message-container">
+            <p style="color:#ffeba7">{{ message.sender.username }}:</p>
+            <p>{{ message.content }}</p>
+            {% if message.sender == request.user %}
+                <form method="post" action="{% url 'delete_message' thread_id=thread.id message_id=message.id %}" class="delete-form">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-btn">&#10006;</button>
+                </form>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <form method="post">
+        {% csrf_token %}
+        <label for="content">Message:</label>
+        <textarea style ="color:white"id="content" name="content" required></textarea>
+        <button type="submit">Send</button>
+    </form>
+    <br>
+    <a href="{% url 'thread_list' %}" class="btn btn-primary">Back to Thread List</a>
+{% endblock %}

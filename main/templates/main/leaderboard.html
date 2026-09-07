@@ -1,0 +1,160 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<title>Leaderboard</title>
+<style>
+    /* Style for the table container */
+    .table-container {
+        background-color: #333;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 1000px;
+        overflow-x: auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Style for the table */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Style for table header */
+    th {
+        background-color: #222;
+        color: #fff;
+        padding: 12px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    /* Style for table rows */
+    td {
+        padding: 12px;
+        color: #fff;
+    }
+
+    /* Style for alternating row background */
+    tr:nth-child(even) {
+        background-color: #444;
+    }
+
+    /* DataTable custom styling */
+    #leaderboard-table_wrapper {
+        padding: 20px;
+        color: white;
+        border-radius: 10px;
+        overflow: auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #leaderboard-table_filter input {
+        width: 150px;
+        height: 28px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        background-color: #222;
+        color: white;
+    }
+
+    #leaderboard-table th,
+    #leaderboard-table td {
+        text-align: center;
+        color: white;
+        border: 1px solid #555;
+    }
+
+    #leaderboard-table tfoot th {
+        background-color: #333;
+    }
+
+    #leaderboard-table_paginate {
+        margin-top: 20px;
+    }
+
+    /* Custom styling for Previous and Next buttons */
+    #leaderboard-table_previous,
+    #leaderboard-table_next {
+        color: white !important;
+        background-color: #333 !important;
+        border: 1px solid #555 !important;
+        padding: 8px 12px !important;
+        border-radius: 5px !important;
+        transition: background-color 0.3s;
+    }
+
+    #leaderboard-table_previous:hover,
+    #leaderboard-table_next:hover {
+        background-color: #555 !important;
+    }
+    #leaderboard-table_length select {
+        display: block; /* Display the select as a block */
+        width: 75px;
+        height: 28px;
+        margin: 5px 0; /* Adjust margin as needed */
+        border: 1px solid #555;
+        border-radius: 5px;
+        background-color: #222;
+        color: white;
+        
+    }
+
+    /* Responsive adjustments */
+    @media only screen and (max-width: 768px) {
+        .table-container {
+            overflow-x: auto;
+        }
+        #leaderboard-table th,
+        #leaderboard-table td {
+            font-size: 14px; /* Adjust font size as needed */
+        }
+    }
+</style>
+
+<div class="table-container">
+    <table id="leaderboard-table" class="display responsive" style="width:100%">
+        <thead>
+            <tr>
+                <th>Position</th>
+                <th>Username</th>
+                <th>Team Supported</th>
+                <th>Points Balance</th>
+                <th>Total Points Placed</th>
+                <th>Total Points Won</th>
+                <th>Percentage of Points Won</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_data in users_data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ user_data.username }}</td>
+                <td>{{ user_data.favourite_team }}</td>
+                <td>{{ user_data.points }}</td>
+                <td>{{ user_data.total_points_placed }}</td>
+                <td>{{ user_data.total_points_won }}</td>
+                <td>{{ user_data.percentage_of_points_won }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+
+<!-- DataTables JS -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables
+        $('#leaderboard-table').DataTable({
+            responsive: true
+        });
+    });
+</script>
+
+{% endblock %}
